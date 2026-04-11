@@ -7,3 +7,4 @@ TEAM NAME
 - **EZ**: Student, Orange Belt, iCode Columbia
 
 Mythical creature website
+Mythical creatures are a Firey Dragon,
