@@ -8,3 +8,5 @@ TEAM NAME
 
 Mythical creature website
 Mythical creatures are a Firey Dragon,
+
+The theme is LOTR
