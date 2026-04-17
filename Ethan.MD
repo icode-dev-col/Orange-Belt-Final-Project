@@ -1,4 +1,3 @@
-````markdown
 # Ethan – Game Lead (Interaction Engineer)
 
 Welcome, Ethan!
@@ -277,9 +276,10 @@ You are creating an EXPERIENCE.
 Think like a game designer:
 
 👉 “Is this fun?”
+
 👉 “Would I play this again?”
 
-If yes — you’ve done an amazing job.
+If yes, you’ve done an amazing job.
 
 ---
 
