@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dragon - Mini-Game</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .magical-bg-container {
+            background-image: url('../images/dragon.png');
+            filter: brightness(0.25) contrast(1.1);
+        }
+        .hoard-counter {
+            font-size: 3rem;
+            color: var(--gold);
+            text-shadow: 0 0 15px var(--gold-glow);
+            margin: 2rem 0;
+            font-family: var(--font-heading);
+        }
+        .btn-magic.feed:active {
+            transform: scale(0.95);
+        }
+        .gem-particle {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: fallAndFade 1s forwards ease-out;
+            z-index: 100;
+        }
+        @keyframes fallAndFade {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="page-transition">
+
+    <div class="magical-bg-container"></div>
+    <div class="overlay"></div>
+
+    <nav>
+        <a href="../index.html">← Return to Forest</a>
+        <a href="index.html">Gallery</a>
+        <a href="info.html">Lore</a>
+        <a href="game.html" class="active">Mini-Game</a>
+    </nav>
+
+    <main>
+        <div class="content-box game-container" style="position: relative; overflow: hidden;" id="game-area">
+            <h1 class="cinzel" style="font-size: 2.5rem;">Satiate the Beast</h1>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Click the button to offer gold to the dragon. Fill the hoard!</p>
+            
+            <div class="hoard-counter">Gold: <span id="score">0</span></div>
+            
+            <button class="btn-magic feed" id="feed-btn">Offer Gold</button>
+            <p id="message" style="margin-top: 2rem; font-style: italic; color: var(--gold); height: 20px;"></p>
+        </div>
+    </main>
+
+    <script>
+        let score = 0;
+        const scoreEl = document.getElementById('score');
+        const feedBtn = document.getElementById('feed-btn');
+        const messageEl = document.getElementById('message');
+        const gameArea = document.getElementById('game-area');
+
+        const gems = ["🪙", "💎", "✨"];
+
+        feedBtn.addEventListener('click', (e) => {
+            score++;
+            scoreEl.innerText = score;
+            
+            // Create particle effect at mouse position
+            createParticle(e.clientX, e.clientY);
+
+            // Update message based on score
+            if(score === 10) messageEl.innerText = "The dragon acknowledges your tribute.";
+            if(score === 25) messageEl.innerText = "The dragon's eyes gleam with greed.";
+            if(score === 50) messageEl.innerText = "The dragon's hoard grows massive. It slumbers.";
+            if(score === 100) messageEl.innerText = "You are crowned the Keeper of the Hoard!";
+        });
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('gem-particle');
+            particle.innerText = gems[Math.floor(Math.random() * gems.length)];
+            
+            // Position near the button click but relative to viewport initially, then convert to absolute if needed
+            // Since it's fixed inside the box context, we'll append to body to avoid clipping
+            document.body.appendChild(particle);
+            
+            particle.style.left = (x - 20) + 'px';
+            particle.style.top = (y - 30) + 'px';
+
+            setTimeout(() => {
+                particle.remove();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
