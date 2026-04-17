@@ -53,27 +53,88 @@ Browsers enforce strict "autoplay policies" that prevent audio from playing auto
 
 ```text
 Orange belt project/
-├── index.html           # The main entry point (Magical Forest Home)
-├── team.html            # The Fellowship page with team portfolios
+├── index.html                # Main entry point (Magical Forest Home)
+├── team.html                 # Fellowship / team page
+├── README.md                 # Project overview and documentation
+
 ├── css/
-│   └── style.css        # The global stylesheet for all pages
-├── images/              # Custom generated AI fantasy illustrations
+│   └── style.css             # Global stylesheet
+
+├── images/                   # Fantasy assets
 │   ├── forest.png
 │   ├── dragon.png
 │   ├── elf.png
 │   └── unicorn.png
-├── dragon/              # Dragon Hub
-│   ├── index.html       # Gallery
-│   ├── info.html        # Lore
-│   └── game.html        # "Feed the Dragon" Mini-game
-├── elf/                 # Elf Hub
-│   ├── index.html 
-│   ├── info.html      
-│   └── game.html        # "Archery Practice" Mini-game
-└── unicorn/             # Unicorn Hub
-    ├── index.html  
-    ├── info.html       
-    └── game.html        # "Reveal the Magic" Mini-game
+
+├── dragon/                   # Dragon Hub
+│   ├── index.html            # Gallery
+│   ├── info.html             # Lore
+│   └── game.html             # "Feed the Dragon" Mini-game
+
+├── elf/                      # Elf Hub
+│   ├── index.html
+│   ├── info.html
+│   └── game.html             # "Archery Practice" Mini-game
+
+├── unicorn/                  # Unicorn Hub
+│   ├── index.html
+│   ├── info.html
+│   └── game.html             # "Reveal the Magic" Mini-game
+
+├── instructions/             # Team roles & guidance (learning docs)
+│   ├── Instructions.MD       # Overall project instructions
+│   ├── Aiden.MD              # UI Lead (Front-End Architect)
+│   ├── Ethan.MD              # Game Lead (Interaction Engineer)
+│   ├── Maya.MD               # Styling & Animation Lead
+│   └── instructor.md         # Integration & project management guide
 ```
 
 ---
+
+## **Team Expectations & Final Presentation**
+
+Throughout this project, each team member is expected to take ownership of their role and actively contribute to the development of the website.
+
+### Expectations
+
+* Keep track of your progress and updates during development
+* Be familiar with the tools and concepts used in your section
+* Write clear and meaningful commit messages when pushing code
+* Test your work regularly to ensure everything functions correctly
+* Collaborate with your teammates to maintain consistency across the website
+
+---
+
+### **Understanding Over Just Building**
+
+Students are expected to not only build their components but also understand:
+
+* How their code works
+* Why certain tools or techniques were used
+* How their section connects to the rest of the project
+
+---
+
+### **Final Presentation**
+
+During the final class, each team member will present their work.
+
+Each student should be prepared to explain:
+
+* Their role in the project
+* The features they built
+* The tools and technologies they used (HTML, CSS, JavaScript, GitHub, etc.)
+* How their code works (at a conceptual level)
+* Any challenges they faced and how they solved them
+
+---
+
+### **Goal of the Presentation**
+
+The goal is to demonstrate:
+
+* Technical understanding
+* Problem-solving skills
+* Clear communication of ideas
+
+This ensures that students are not only building projects, but also developing the ability to **explain and present their work like real developers**.
