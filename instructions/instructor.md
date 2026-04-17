@@ -77,7 +77,7 @@ Before deployment, verify:
 
 ---
 
-# 🧠 Core Concepts
+# Core Concepts
 
 ## 1. System Integration
 
@@ -194,8 +194,3 @@ css/
 * Navigation is consistent across all pages
 * No broken links
 * No major bugs
-
-If you want next, we can:
-👉 Add a **grading rubric aligned to each MD (super powerful)**  
-👉 Or a **daily workflow (standups + checkpoints)** to run the project smoothly
-```
