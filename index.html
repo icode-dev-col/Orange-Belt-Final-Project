@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Magical Forest - Fantasy Realm</title>
+    <meta name="description" content="Explore the dark magical forest and discover mythical fantasy creatures.">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .magical-bg-container {
+            background-image: url('images/forest.png');
+        }
+        
+        .enter-forest-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 14, 10, 0.95);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        .enter-forest-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="page-transition">
+
+    <!-- Pre-interaction overlay for audio playback policy -->
+    <div id="enter-overlay" class="enter-forest-overlay">
+        <h1 class="cinzel" style="font-size: 3rem; margin-bottom: 2rem; text-align: center;">Welcome to the Magical Forest</h1>
+        <button id="enter-btn" class="btn-magic">Enter the Realm</button>
+    </div>
+
+    <!-- Background Audio (Generic Forest Ambience from external source) -->
+    <audio id="forest-audio" loop>
+        <!-- Using a reliable free placeholder ambient sound -->
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="magical-bg-container"></div>
+    <div class="overlay"></div>
+    <div class="mist"></div>
+    <div class="mist slow"></div>
+    
+    <div id="particles-container"></div>
+
+    <nav>
+        <span class="cinzel" style="font-size: 1.5rem; letter-spacing: 3px; color: var(--gold); text-shadow: 0 0 10px var(--gold);">The Grove of Legends</span>
+        <a href="index.html" class="active">The Forest</a>
+        <a href="team.html">The Fellowship</a>
+    </nav>
+
+    <main>
+        <header class="hero">
+            <h1>Discover the Myths</h1>
+            <p>Step deeper into the ancient shadows. Three legendary creatures await those brave enough to seek them out. Choose your path wisely.</p>
+        </header>
+
+        <section class="creature-grid">
+            <a href="dragon/index.html" class="card">
+                <div class="card-img" style="background-image: url('images/dragon.png');"></div>
+                <div class="card-content">
+                    <h2 class="cinzel">The Dragon</h2>
+                    <p>Ancient ruler of the crags and fiery peaks.</p>
+                </div>
+            </a>
+            
+            <a href="unicorn/index.html" class="card">
+                <div class="card-img" style="background-image: url('images/unicorn.png');"></div>
+                <div class="card-content">
+                    <h2 class="cinzel">The Unicorn</h2>
+                    <p>Ethereal spirit of the silver moonlight.</p>
+                </div>
+            </a>
+
+            <a href="elf/index.html" class="card">
+                <div class="card-img" style="background-image: url('images/elf.png');"></div>
+                <div class="card-content">
+                    <h2 class="cinzel">The Elf</h2>
+                    <p>Swift archer of the deep ancient woods.</p>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <script>
+        // Enter Overlay and Audio Logic
+        const enterOverlay = document.getElementById('enter-overlay');
+        const enterBtn = document.getElementById('enter-btn');
+        const forestAudio = document.getElementById('forest-audio');
+
+        enterBtn.addEventListener('click', () => {
+            enterOverlay.classList.add('hidden');
+            // Try to play audio
+            forestAudio.volume = 0.4;
+            forestAudio.play().catch(e => console.log("Audio play failed:", e));
+            
+            // Remove overlay from DOM after transition
+            setTimeout(() => {
+                enterOverlay.style.display = 'none';
+            }, 1000);
+        });
+
+        // Generate glowing particles (Fireflies)
+        const particlesContainer = document.getElementById('particles-container');
+        const numParticles = 40;
+
+        for (let i = 0; i < numParticles; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random positioning
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = Math.random() * 100 + 'vh';
+            
+            // Random animation delay and duration to make it look organic
+            particle.style.animationDelay = (Math.random() * 4) + 's';
+            particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>
