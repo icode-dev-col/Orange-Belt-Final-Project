@@ -2,6 +2,8 @@
 
 Welcome to the **Magical Forest**, an immersive, multi-page fantasy-themed website inspired by the aesthetics of Lord of the Rings. This project was built by the **Orange Belt Team** as a showcase of advanced HTML, CSS, and JavaScript skills, along with interactive web design principles.
 
+Our site is live at https://icode-dev-col.github.io/Orange-Belt-Final-Project/
+
 ---
 
 ## The Fellowship of the Orange Belt
