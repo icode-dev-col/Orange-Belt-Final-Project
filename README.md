@@ -10,7 +10,7 @@ Our site is live at https://icode-dev-col.github.io/Orange-Belt-Final-Project/
 
 Our coding fellowship consists of:
 * **Ms. N** - Grandmaster Instructor
-* **Aiden** - Dragon Tamer
+* **AA** - Dragon Tamer
 * **Maya** - Elven Ranger
 * **Ethan** - Knight of the Realm
 
