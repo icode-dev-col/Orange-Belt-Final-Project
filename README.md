@@ -138,3 +138,7 @@ The goal is to demonstrate:
 * Clear communication of ideas
 
 This ensures that students are not only building projects, but also developing the ability to **explain and present their work like real developers**.
+
+                                                              Questions
+
+AA:I tried my best to change the unicorn photo into a Pixie but I couldn't do it.I'm sorry.I'll see you in 2 weeks.
