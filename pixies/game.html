@@ -3,18 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixie Magic Jump - 50 Platforms</title>
+<title>Pixie Magic Jump </title>
 <style>
-    body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: #1a0033; }
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a0033; }
     .overlay { position: fixed; width: 100%; height: 100%; background: linear-gradient(to bottom, #1a0033, #4a0080); z-index: -1; }
     #game { position: absolute; width: 100%; height: 100%; }
-    #player { width: 30px; height: 30px; background: gold; border-radius: 50%; position: absolute; box-shadow: 0 0 15px gold; z-index: 5; }
-    .platform { height: 12px; background: #44cc44; position: absolute; border-radius: 5px; box-shadow: 0 4px 0 #2d5a1e; }
-    .powerup { width: 20px; height: 20px; background: cyan; position: absolute; border-radius: 50%; box-shadow: 0 0 15px cyan; animation: twinkle 0.5s infinite alternate; }
-    #score { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; font-weight: bold; z-index: 20; }
-    @keyframes twinkle { from { transform: scale(0.8); opacity: 0.7; } to { transform: scale(1.2); opacity: 1; } }
-    .screen { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 100; }
-    button { padding: 15px 30px; font-size: 18px; background: gold; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+    
+    /* Player Pixie */
+    #player { 
+        width: 40px; height: 40px; 
+        position: absolute; 
+        display: flex; justify-content: center; align-items: center;
+        font-size: 35px; 
+        z-index: 10;
+        transition: transform 0.1s;
+    }
+
+    /* Platforms */
+    .platform { height: 12px; position: absolute; border-radius: 10px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+    .normal { background: #44cc44; }
+    .moving { background: #ffcc00; border: 2px solid #fff; }
+    .breaking { background: #ff4444; border-style: dashed; }
+
+    /* Powerups */
+    .powerup { 
+        width: 25px; height: 25px; position: absolute; 
+        border-radius: 50%; display: flex; justify-content: center; 
+        align-items: center; font-size: 15px; animation: twinkle 0.5s infinite alternate; 
+    }
+    .wing { background: cyan; box-shadow: 0 0 15px cyan; } 
+    .shield { background: magenta; box-shadow: 0 0 15px magenta; } 
+    .mini { background: lime; box-shadow: 0 0 15px lime; } 
+
+    #score { position: absolute; top: 20px; left: 20px; color: white; font-size: 28px; font-weight: bold; z-index: 20; text-shadow: 2px 2px 4px #000; }
+    
+    @keyframes twinkle { from { transform: scale(0.8); } to { transform: scale(1.2); } }
+
+    .screen { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 100; text-align: center; }
+    button { padding: 15px 40px; font-size: 20px; background: gold; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    button:hover { transform: scale(1.1); background: #fff; }
 </style>
 </head>
 <body>
@@ -22,15 +49,17 @@
 <div class="overlay"></div>
 <div id="game">
     <div id="score">Score: 0</div>
-    <div id="player"></div>
+    <div id="player">🧚</div>
+    
     <div id="startScreen" class="screen">
-        <h1>🧚 Pixie Jump</h1>
-        <p>Use ← → to move</p>
-        <button onclick="startGame()">Start Game</button>
+        <h1>🧚 Pixie Magic Jump</h1>
+        <p>Use ← → to fly!</p>
+        <button onclick="startGame()">Fly Now!</button>
     </div>
+
     <div id="gameOver" class="screen" style="display:none;">
-        <h1>Game Over</h1>
-        <p>Score: <span id="finalScore"></span></p>
+        <h1>Poof! Magic Ran Out</h1>
+        <p>Your Score: <span id="finalScore"></span></p>
         <button onclick="restart()">Try Again</button>
     </div>
 </div>
@@ -38,65 +67,83 @@
 <script>
 const playerEl = document.getElementById("player");
 const scoreText = document.getElementById("score");
-const startScreen = document.getElementById("startScreen");
-const gameOverScreen = document.getElementById("gameOver");
 const gameContainer = document.getElementById("game");
 
 let x, y, vy, vx, score, gameRunning;
 let gravity = 0.4;
 let platforms = [];
 let powerups = [];
-const PLATFORM_COUNT = 50; // Set to 50 platforms
+const PLATFORM_COUNT = 300; // Updated to 300 platforms
 
 function init() {
-    x = window.innerWidth / 2 - 15;
+    x = window.innerWidth / 2 - 20;
     y = window.innerHeight - 150;
     vy = 0; vx = 0; score = 0;
     gameRunning = false;
     
-    // Clear existing elements
     platforms.forEach(p => p.el.remove());
     powerups.forEach(p => p.el.remove());
     platforms = [];
     powerups = [];
     scoreText.innerText = "Score: 0";
+    playerEl.style.transform = "scale(1)";
 }
 
-function addPlatform(px, py, width) {
+function addPlatform(px, py, width, type = 'normal') {
     let el = document.createElement("div");
-    el.className = "platform";
+    el.className = `platform ${type}`;
     el.style.width = width + "px";
     el.style.left = px + "px";
     el.style.top = py + "px";
     gameContainer.appendChild(el);
-    platforms.push({el, x: px, y: py, w: width});
+    
+    platforms.push({
+        el, x: px, y: py, w: width, 
+        type: type, 
+        dir: Math.random() > 0.5 ? 1 : -1
+    });
 
-    if (Math.random() > 0.9) {
-        addPowerup(px + (width/2) - 10, py - 30);
+    // Spawn powerups on about 5% of platforms
+    if (Math.random() > 0.95) { 
+        const types = ['wing', 'shield', 'mini'];
+        const randType = types[Math.floor(Math.random() * types.length)];
+        addPowerup(px + (width/2) - 12, py - 35, randType);
     }
 }
 
-function addPowerup(px, py) {
+function addPowerup(px, py, type) {
     let el = document.createElement("div");
-    el.className = "powerup";
+    el.className = `powerup ${type}`;
+    let icon = type === 'wing' ? '🪽' : (type === 'shield' ? '⭐' : '✨');
+    el.innerText = icon;
     el.style.left = px + "px";
     el.style.top = py + "px";
     gameContainer.appendChild(el);
-    powerups.push({el, x: px, y: py});
+    powerups.push({el, x: px, y: py, type: type});
 }
 
-function createPlatforms() {
-    // Starting platform right under the player
-    addPlatform(x - 35, y + 50, 100);
+function createInitialPlatforms() {
+    // Starting platform
+    addPlatform(x - 30, y + 50, 100, 'normal');
 
-    // Generate the rest of the 50 platforms
+    // Scatter 300 platforms throughout the starting vertical space
     for (let i = 1; i < PLATFORM_COUNT; i++) {
-        addPlatform(
-            Math.random() * (window.innerWidth - 70),
-            window.innerHeight - (i * 65), // Spacing them out vertically
-            60 + Math.random() * 40
-        );
+        spawnPlatformAtY(window.innerHeight - (i * 40)); // Closer vertical spacing for high density
     }
+}
+
+function spawnPlatformAtY(atY) {
+    let type = 'normal';
+    let rand = Math.random();
+    if (rand > 0.9) type = 'moving';
+    else if (rand > 0.8) type = 'breaking';
+    
+    addPlatform(
+        Math.random() * (window.innerWidth - 80),
+        atY,
+        60 + Math.random() * 40,
+        type
+    );
 }
 
 function update() {
@@ -106,44 +153,51 @@ function update() {
     y += vy;
     x += vx;
 
-    // Wrap around screen
-    if (x < -30) x = window.innerWidth;
-    if (x > window.innerWidth) x = -30;
+    if (x < -40) x = window.innerWidth;
+    if (x > window.innerWidth) x = -40;
 
-    // Platform Collision
-    if (vy > 0) {
-        platforms.forEach(p => {
-            if (x + 30 > p.x && x < p.x + p.w && y + 30 > p.y && y + 30 < p.y + 15) {
-                vy = -11; 
-                y = p.y - 30; // Snap to top of platform
+    platforms.forEach((p) => {
+        if (p.type === 'moving') {
+            p.x += p.dir * 1.5;
+            if (p.x < 0 || p.x > window.innerWidth - p.w) p.dir *= -1;
+            p.el.style.left = p.x + "px";
+        }
+
+        // Collision logic
+        if (vy > 0 && x + 30 > p.x && x < p.x + p.w && y + 35 > p.y && y + 35 < p.y + 15) {
+            if (p.type === 'breaking') {
+                p.el.style.opacity = "0";
+                setTimeout(() => { p.y = 10000; }, 100); 
             }
-        });
-    }
+            vy = -12; 
+            y = p.y - 35;
+        }
+    });
 
-    // Powerup collision
     powerups.forEach((p, index) => {
-        if (x + 30 > p.x && x < p.x + 20 && y + 30 > p.y && y < p.y + 20) {
-            vy = -22; 
+        if (x + 35 > p.x && x < p.x + 25 && y + 35 > p.y && y < p.y + 25) {
+            applyPowerEffect(p.type);
             p.el.remove();
             powerups.splice(index, 1);
         }
     });
 
-    // Camera movement
+    // Vertical Camera Scroll
     if (y < window.innerHeight / 2) {
         let diff = window.innerHeight / 2 - y;
         y = window.innerHeight / 2;
-        score += Math.floor(diff / 5);
+        score += Math.floor(diff / 2);
 
         platforms.forEach(p => {
             p.y += diff;
             p.el.style.top = p.y + "px";
             
-            // Recycle platform to top if it goes off bottom
+            // Loop platforms back to top when they fall off screen
             if (p.y > window.innerHeight) {
-                p.y = -20; 
-                p.x = Math.random() * (window.innerWidth - 70);
+                p.y -= (PLATFORM_COUNT * 40); // Move to the very top of the stack
+                p.x = Math.random() * (window.innerWidth - 80);
                 p.el.style.left = p.x + "px";
+                p.el.style.opacity = "1"; 
             }
         });
 
@@ -153,19 +207,29 @@ function update() {
         });
     }
 
-    // Game over check
     if (y > window.innerHeight) endGame();
 
     playerEl.style.left = x + "px";
     playerEl.style.top = y + "px";
+    playerEl.style.transform = vx > 0 ? "scaleX(1)" : (vx < 0 ? "scaleX(-1)" : playerEl.style.transform);
     scoreText.innerText = "Score: " + score;
 
     requestAnimationFrame(update);
 }
 
+function applyPowerEffect(type) {
+    if (type === 'wing') vy = -28;
+    else if (type === 'shield') score += 1000;
+    else if (type === 'mini') {
+        playerEl.style.filter = "hue-rotate(150deg) brightness(1.5)";
+        setTimeout(() => playerEl.style.filter = "none", 3000);
+        vy = -20;
+    }
+}
+
 window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") vx = -7;
-    if (e.key === "ArrowRight") vx = 7;
+    if (e.key === "ArrowLeft") vx = -8;
+    if (e.key === "ArrowRight") vx = 8;
 });
 window.addEventListener("keyup", (e) => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") vx = 0;
@@ -173,24 +237,22 @@ window.addEventListener("keyup", (e) => {
 
 function startGame() {
     init();
-    startScreen.style.display = "none";
-    gameOverScreen.style.display = "none";
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("gameOver").style.display = "none";
     gameRunning = true;
-    createPlatforms();
+    createInitialPlatforms();
     update();
 }
 
 function endGame() {
     gameRunning = false;
-    gameOverScreen.style.display = "flex";
+    document.getElementById("gameOver").style.display = "flex";
     document.getElementById("finalScore").innerText = score;
 }
 
 function restart() {
     startGame();
 }
-
-init();
 </script>
 </body>
 </html>
