@@ -1,127 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Elf - Mini-Game</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .magical-bg-container {
-            background-image: url('../images/elf.png');
-            filter: brightness(0.3) contrast(1.1);
-        }
-        
-        .archery-canvas {
-            width: 100%;
-            height: 400px;
-            background: rgba(17, 42, 24, 0.7);
-            border: 2px solid #a4d4b4;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emerald Archer - Training Grounds</title>
 
-        .target {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, red 20%, white 30%, red 50%, white 70%, red 90%);
-            border-radius: 50%;
-            cursor: crosshair;
-            transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        
-        .score-board {
-            font-size: 2rem;
-            color: #a4d4b4;
-            font-family: var(--font-heading);
-            margin-top: 1rem;
-        }
-    </style>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #040d08;
+        color: #ecfdf5;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    /* Game Canvas */
+    .archery-canvas {
+        width: 100%;
+        height: 600px;
+        background: radial-gradient(circle at 50% 40%, #1a3a2a 0%, #040d08 70%);
+        border-bottom: 8px solid #0a1a12;
+        position: relative;
+        overflow: hidden;
+        cursor: crosshair;
+        box-shadow: inset 0 -20px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Target Styling */
+    .target {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: rgba(239, 68, 68, 0.2);
+        border: 4px solid #ffffff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+    .target::after {
+        content: '';
+        width: 15px;
+        height: 15px;
+        background: #ef4444;
+        border-radius: 50%;
+    }
+
+    /* Character & Bow */
+    .elf {
+        position: absolute;
+        width: 60px;
+        height: 80px;
+        bottom: 20px;
+        left: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 20;
+    }
+
+    .elf-emoji {
+        font-size: 50px;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        user-select: none;
+    }
+
+    .bow-container {
+        position: absolute;
+        width: 60px;
+        height: 100px;
+        top: 35px;
+        left: 25px; /* Position bow relative to elf hand */
+        pointer-events: none;
+        transform-origin: 10px 50px; /* Pivot around the handle */
+        transition: transform 0.1s ease-out;
+    }
+
+    /* Arrow Styling */
+    .arrow {
+        position: absolute;
+        width: 40px;
+        height: 3px;
+        background: #8d6e63;
+        border-radius: 2px;
+        z-index: 15;
+    }
+    .arrow::before { /* Fletching */
+        content: '';
+        position: absolute;
+        left: 0;
+        top: -3px;
+        width: 8px;
+        height: 9px;
+        background: #34d399;
+        clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
+    }
+    .arrow::after { /* Tip */
+        content: '';
+        position: absolute;
+        right: -2px;
+        top: -2px;
+        width: 6px;
+        height: 6px;
+        background: #94a3b8;
+        transform: rotate(45deg);
+    }
+
+    /* UI Elements */
+    .hud {
+        padding: 20px;
+        background: #040d08;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .stat-box {
+        background: rgba(16, 185, 129, 0.1);
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        font-weight: bold;
+    }
+
+    #start-btn {
+        padding: 12px 40px;
+        font-size: 18px;
+        background: #10b981;
+        color: #040d08;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 800;
+        text-transform: uppercase;
+        transition: all 0.2s;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    #start-btn:hover {
+        background: #34d399;
+        transform: scale(1.05);
+    }
+</style>
 </head>
-<body class="page-transition">
 
-    <div class="magical-bg-container"></div>
-    <div class="overlay"></div>
+<body>
 
-    <nav>
-        <a href="../index.html">← Return to Forest</a>
-        <a href="index.html">Gallery</a>
-        <a href="info.html">Lore</a>
-        <a href="game.html" class="active">Mini-Game</a>
-    </nav>
+<div class="hud">
+    <h2 style="margin:0; color:#34d399;">🧝 Elf Archer</h2>
+    <div class="stat-box">HITS: <span id="hits">0</span></div>
+    <button id="start-btn">Begin Hunt</button>
+</div>
 
-    <main>
-        <div class="content-box game-container">
-            <h1 class="cinzel" style="font-size: 2.5rem; color: #a4d4b4;">Archery Practice</h1>
-            <p style="color: #ccc; margin-top: 1rem;">Click the moving targets before they vanish. Test your reflexes.</p>
-            
-            <div class="score-board">Hits: <span id="hits">0</span></div>
-            
-            <button class="btn-magic" id="start-btn" style="margin-bottom: 2rem;">Start Practice</button>
-
-            <div class="archery-canvas" id="canvas"></div>
+<div class="archery-canvas" id="canvas">
+    <div class="elf" id="player-elf">
+        <div class="elf-emoji">🧝</div>
+        <div class="bow-container" id="bow-ui">
+            <svg width="60" height="100" viewBox="0 0 60 100">
+                <path d="M 10 10 C 50 10, 50 90, 10 90" fill="none" stroke="#5d4037" stroke-width="6" stroke-linecap="round"/>
+                <path id="bow-string" d="M 10 12 L 10 50 L 10 88" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+            </svg>
         </div>
-    </main>
+    </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const startBtn = document.getElementById('start-btn');
-        const hitsEl = document.getElementById('hits');
+<script>
+const canvas = document.getElementById('canvas');
+const hitsEl = document.getElementById('hits');
+const startBtn = document.getElementById('start-btn');
+const bowString = document.getElementById('bow-string');
+const bowContainer = document.getElementById('bow-ui');
+const playerElf = document.getElementById('player-elf');
+
+let hits = 0;
+let arrows = [];
+let targets = [];
+let isPlaying = false;
+const gravity = 0.25;
+
+let elfX = 100;
+let mouseX = 0;
+let mouseY = 0;
+let isAiming = false;
+let aimStartX = 0;
+let aimStartY = 0;
+
+// Update mouse tracking
+window.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+
+    if (!isAiming) {
+        // Look at cursor
+        const bowWorldX = elfX + 35;
+        const bowWorldY = canvas.clientHeight - 45;
+        const angle = Math.atan2(mouseY - bowWorldY, mouseX - bowWorldX);
+        bowContainer.style.transform = `rotate(${angle}rad)`;
+    } else {
+        // Drag logic: Pulling backwards
+        const dx = aimStartX - mouseX;
+        const dy = aimStartY - mouseY;
+        const angle = Math.atan2(dy, dx);
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const drawAmount = Math.min(dist / 2, 40);
         
-        let hits = 0;
-        let gameInterval;
-        let isPlaying = false;
+        bowContainer.style.transform = `rotate(${angle}rad)`;
+        bowString.setAttribute('d', `M 10 12 L ${10 - drawAmount} 50 L 10 88`);
+    }
+});
 
-        startBtn.addEventListener('click', () => {
-            if(isPlaying) return;
-            isPlaying = true;
-            hits = 0;
-            hitsEl.innerText = hits;
-            startBtn.innerText = "Practicing...";
-            canvas.innerHTML = '';
-            
-            // Spawn a target every 1.5 seconds, for 15 seconds
-            let spawnCount = 0;
-            gameInterval = setInterval(() => {
-                spawnTarget();
-                spawnCount++;
-                if(spawnCount >= 10) {
-                    clearInterval(gameInterval);
-                    setTimeout(() => {
-                        isPlaying = false;
-                        startBtn.innerText = "Play Again";
-                        alert("Practice over! Total Hits: " + hits);
-                    }, 2000);
-                }
-            }, 1000);
-        });
+canvas.addEventListener('mousedown', (e) => {
+    if (!isPlaying) return;
+    isAiming = true;
+    const rect = canvas.getBoundingClientRect();
+    aimStartX = e.clientX - rect.left;
+    aimStartY = e.clientY - rect.top;
+});
 
-        function spawnTarget() {
-            const target = document.createElement('div');
-            target.classList.add('target');
-            
-            const maxX = canvas.clientWidth - 50;
-            const maxY = canvas.clientHeight - 50;
-            
-            target.style.left = Math.random() * maxX + 'px';
-            target.style.top = Math.random() * maxY + 'px';
-            
-            target.addEventListener('mousedown', () => {
+window.addEventListener('mouseup', (e) => {
+    if (!isAiming) return;
+    isAiming = false;
+
+    const dx = aimStartX - mouseX;
+    const dy = aimStartY - mouseY;
+    const angle = Math.atan2(dy, dx);
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    
+    // Power calculation
+    const power = Math.min(dist * 0.15, 20);
+    
+    // Reset string
+    bowString.setAttribute('d', `M 10 12 L 10 50 L 10 88`);
+    
+    if (power > 2) {
+        shootArrow(angle, power);
+    }
+});
+
+function shootArrow(angle, power) {
+    const arrowEl = document.createElement('div');
+    arrowEl.className = 'arrow';
+    canvas.appendChild(arrowEl);
+
+    arrows.push({
+        el: arrowEl,
+        x: elfX + 35,
+        y: canvas.clientHeight - 45,
+        vx: Math.cos(angle) * power,
+        vy: Math.sin(angle) * power,
+        rotation: angle
+    });
+}
+
+function spawnTarget() {
+    const targetEl = document.createElement('div');
+    targetEl.className = 'target';
+    const x = Math.random() * (canvas.clientWidth - 200) + 150;
+    const y = Math.random() * (canvas.clientHeight - 250) + 50;
+    targetEl.style.left = x + 'px';
+    targetEl.style.top = y + 'px';
+    canvas.appendChild(targetEl);
+    targets.push({ el: targetEl, x, y, size: 40 });
+
+    setTimeout(() => {
+        if (targetEl.parentNode) {
+            targetEl.remove();
+            targets = targets.filter(t => t.el !== targetEl);
+        }
+    }, 4000);
+}
+
+function update() {
+    // Update Arrow Physics
+    arrows.forEach((arrow, i) => {
+        arrow.vy += gravity;
+        arrow.x += arrow.vx;
+        arrow.y += arrow.vy;
+        arrow.rotation = Math.atan2(arrow.vy, arrow.vx);
+
+        arrow.el.style.left = arrow.x + 'px';
+        arrow.el.style.top = arrow.y + 'px';
+        arrow.el.style.transform = `translate(-50%, -50%) rotate(${arrow.rotation}rad)`;
+
+        // Collision Check
+        targets.forEach((target, ti) => {
+            const dx = arrow.x - (target.x + 20);
+            const dy = arrow.y - (target.y + 20);
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist < 25) {
+                target.el.style.transform = 'scale(1.5)';
+                target.el.style.opacity = '0';
+                setTimeout(() => target.el.remove(), 100);
+                arrow.el.remove();
+                
+                targets.splice(ti, 1);
+                arrows.splice(i, 1);
                 hits++;
                 hitsEl.innerText = hits;
-                target.remove();
-            });
+            }
+        });
 
-            canvas.appendChild(target);
-
-            // Target disappears after a short time
-            setTimeout(() => {
-                if(target.parentNode) target.remove();
-            }, 800);
+        // Cleanup
+        if (arrow.y > canvas.clientHeight + 100 || arrow.x > canvas.clientWidth + 100 || arrow.x < -100) {
+            arrow.el.remove();
+            arrows.splice(i, 1);
         }
-    </script>
+    });
+
+    requestAnimationFrame(update);
+}
+
+startBtn.addEventListener('click', () => {
+    if (isPlaying) return;
+    isPlaying = true;
+    hits = 0;
+    hitsEl.innerText = hits;
+    startBtn.innerText = "HUNTING...";
+    startBtn.style.opacity = "0.5";
+
+    let count = 0;
+    const interval = setInterval(() => {
+        spawnTarget();
+        count++;
+        if (count >= 20) {
+            clearInterval(interval);
+            setTimeout(() => {
+                isPlaying = false;
+                startBtn.innerText = "Begin Hunt";
+                startBtn.style.opacity = "1";
+                alert("Hunt Concluded. Final Score: " + hits);
+            }, 4000);
+        }
+    }, 1000);
+});
+
+// Start loop
+update();
+</script>
 </body>
 </html>
