@@ -1,105 +1,234 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Dragon - Mini-Game</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .magical-bg-container {
-            background-image: url('../images/dragon.png');
-            filter: brightness(0.25) contrast(1.1);
-        }
-        .hoard-counter {
-            font-size: 3rem;
-            color: var(--gold);
-            text-shadow: 0 0 15px var(--gold-glow);
-            margin: 2rem 0;
-            font-family: var(--font-heading);
-        }
-        .btn-magic.feed:active {
-            transform: scale(0.95);
-        }
-        .gem-particle {
-            position: absolute;
-            font-size: 2rem;
-            pointer-events: none;
-            animation: fallAndFade 1s forwards ease-out;
-            z-index: 100;
-        }
-        @keyframes fallAndFade {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
-        }
-    </style>
-</head>
-<body class="page-transition">
+<body>
 
-    <div class="magical-bg-container"></div>
-    <div class="overlay"></div>
+<div id="game">
+    <div id="topBar">
+        🐉 Level: <span id="level">1</span>
+    </div>
 
-    <nav>
-        <a href="../index.html">← Return to Forest</a>
-        <a href="index.html">Gallery</a>
-        <a href="info.html">Lore</a>
-        <a href="game.html" class="active">Mini-Game</a>
-    </nav>
+    <div id="maze"></div>
 
-    <main>
-        <div class="content-box game-container" style="position: relative; overflow: hidden;" id="game-area">
-            <h1 class="cinzel" style="font-size: 2.5rem;">Satiate the Beast</h1>
-            <p style="color: var(--text-muted); margin-top: 1rem;">Click the button to offer gold to the dragon. Fill the hoard!</p>
-            
-            <div class="hoard-counter">Gold: <span id="score">0</span></div>
-            
-            <button class="btn-magic feed" id="feed-btn">Offer Gold</button>
-            <p id="message" style="margin-top: 2rem; font-style: italic; color: var(--gold); height: 20px;"></p>
-        </div>
-    </main>
+    <div id="winScreen">
+        <h1>🎉 Game Complete!</h1>
+    </div>
+</div>
 
-    <script>
-        let score = 0;
-        const scoreEl = document.getElementById('score');
-        const feedBtn = document.getElementById('feed-btn');
-        const messageEl = document.getElementById('message');
-        const gameArea = document.getElementById('game-area');
+<style>
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: sans-serif;
+    overflow: hidden;
+}
 
-        const gems = ["🪙", "💎", "✨"];
+#game {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-        feedBtn.addEventListener('click', (e) => {
-            score++;
-            scoreEl.innerText = score;
-            
-            // Create particle effect at mouse position
-            createParticle(e.clientX, e.clientY);
+#topBar {
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+    background: #111;
+}
 
-            // Update message based on score
-            if(score === 10) messageEl.innerText = "The dragon acknowledges your tribute.";
-            if(score === 25) messageEl.innerText = "The dragon's eyes gleam with greed.";
-            if(score === 50) messageEl.innerText = "The dragon's hoard grows massive. It slumbers.";
-            if(score === 100) messageEl.innerText = "You are crowned the Keeper of the Hoard!";
+#maze {
+    flex: 1;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(2vmin);
+}
+
+.wall {
+    background: #222;
+}
+
+.path {
+    background: #000;
+}
+
+.goal {
+    background: gold;
+}
+
+#player {
+    font-size: calc(3vmin);
+}
+
+#winScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+}
+</style>
+
+<script>
+const mazeEl = document.getElementById("maze");
+const levelEl = document.getElementById("level");
+const winScreen = document.getElementById("winScreen");
+
+let level = 0;
+let playerPos = {x:0,y:0};
+
+const levels = [
+
+/* LEVEL 1 (tutorial) */
+[
+"########",
+"#S....G#",
+"########"
+],
+
+/* LEVEL 2 (fake paths start) */
+[
+"##########",
+"#S..#....#",
+"#.#.#.##.#",
+"#.#...#..#",
+"#.#####..#",
+"#......G.#",
+"##########"
+],
+
+/* LEVEL 3 (multiple wrong decisions) */
+[
+"############",
+"#S..#......#",
+"#.#.#.####.#",
+"#.#.#....#.#",
+"#...####.#.#",
+"###......#.#",
+"#.########.#",
+"#........G.#",
+"############"
+],
+
+/* LEVEL 4 (long path + traps) */
+[
+"##############",
+"#S#..........#",
+"#.#.########.#",
+"#.#.#......#.#",
+"#...#.####.#.#",
+"###.#.#....#.#",
+"#...#.#.####.#",
+"#.###.#......#",
+"#.....######.#",
+"#.##########G#",
+"##############"
+],
+
+/* LEVEL 5 (INSANE – like Poki style) */
+[
+"################",
+"#S#............#",
+"#.#.##########.#",
+"#.#.#........#.#",
+"#.#.#.######.#.#",
+"#...#.#....#.#.#",
+"#####.#.##.#.#.#",
+"#.....#.#..#.#.#",
+"#.#####.#.##.#.#",
+"#.#.....#....#.#",
+"#.#.##########.#",
+"#.#............#",
+"#.############.#",
+"#............#G#",
+"################"
+]
+
+
+
+
+];
+
+function loadLevel() {
+    mazeEl.innerHTML = "";
+    const map = levels[level];
+
+    const rows = map.length;
+    const cols = map[0].length;
+
+    mazeEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    mazeEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+    map.forEach((row, y) => {
+        [...row].forEach((cell, x) => {
+            const div = document.createElement("div");
+            div.classList.add("cell");
+
+            if (cell === "#") div.classList.add("wall");
+            else div.classList.add("path");
+
+            if (cell === "S") {
+                playerPos = {x, y};
+                div.id = "player";
+                div.innerHTML = "🐉";
+            }
+
+            if (cell === "G") div.classList.add("goal");
+
+            mazeEl.appendChild(div);
         });
+    });
 
-        function createParticle(x, y) {
-            const particle = document.createElement('div');
-            particle.classList.add('gem-particle');
-            particle.innerText = gems[Math.floor(Math.random() * gems.length)];
-            
-            // Position near the button click but relative to viewport initially, then convert to absolute if needed
-            // Since it's fixed inside the box context, we'll append to body to avoid clipping
-            document.body.appendChild(particle);
-            
-            particle.style.left = (x - 20) + 'px';
-            particle.style.top = (y - 30) + 'px';
+    levelEl.innerText = level + 1;
+}
 
-            setTimeout(() => {
-                particle.remove();
-            }, 1000);
+function move(dx, dy) {
+    const map = levels[level];
+    const newX = playerPos.x + dx;
+    const newY = playerPos.y + dy;
+
+    if (map[newY][newX] === "#") return;
+
+    const cells = document.querySelectorAll(".cell");
+    const cols = map[0].length;
+
+    const oldIndex = playerPos.y * cols + playerPos.x;
+    const newIndex = newY * cols + newX;
+
+    cells[oldIndex].innerHTML = "";
+    cells[oldIndex].removeAttribute("id");
+
+    playerPos = {x:newX,y:newY};
+
+    cells[newIndex].id = "player";
+    cells[newIndex].innerHTML = "🐉";
+
+    if (map[newY][newX] === "G") {
+        level++;
+        if (level >= levels.length) {
+            winScreen.style.display = "flex";
+            return;
         }
-    </script>
-    <!-- Background Audio -->
-    <audio autoplay loop>
-        <source src="../dragon-growl.wav" type="audio/wav">
-    </audio>
+        loadLevel();
+    }
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp") move(0,-1);
+    if (e.key === "ArrowDown") move(0,1);
+    if (e.key === "ArrowLeft") move(-1,0);
+    if (e.key === "ArrowRight") move(1,0);
+});
+
+loadLevel();
+</script>
+
 </body>
-</html>
