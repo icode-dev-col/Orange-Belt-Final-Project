@@ -15,7 +15,6 @@
         overflow: hidden;
     }
 
-    /* Game Canvas */
     .archery-canvas {
         width: 100%;
         height: 600px;
@@ -27,7 +26,6 @@
         box-shadow: inset 0 -20px 50px rgba(0,0,0,0.5);
     }
 
-    /* Target Styling */
     .target {
         position: absolute;
         width: 40px;
@@ -54,11 +52,11 @@
         width: 60px;
         height: 80px;
         bottom: 20px;
-        left: 100px;
         display: flex;
         flex-direction: column;
         align-items: center;
         z-index: 20;
+        will-change: left; /* Optimization for movement */
     }
 
     .elf-emoji {
@@ -72,13 +70,12 @@
         width: 60px;
         height: 100px;
         top: 35px;
-        left: 25px; /* Position bow relative to elf hand */
+        left: 25px; 
         pointer-events: none;
-        transform-origin: 10px 50px; /* Pivot around the handle */
+        transform-origin: 10px 50px; 
         transition: transform 0.1s ease-out;
     }
 
-    /* Arrow Styling */
     .arrow {
         position: absolute;
         width: 40px;
@@ -87,28 +84,23 @@
         border-radius: 2px;
         z-index: 15;
     }
-    .arrow::before { /* Fletching */
+    .arrow::before { 
         content: '';
         position: absolute;
-        left: 0;
-        top: -3px;
-        width: 8px;
-        height: 9px;
+        left: 0; top: -3px;
+        width: 8px; height: 9px;
         background: #34d399;
         clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
     }
-    .arrow::after { /* Tip */
+    .arrow::after { 
         content: '';
         position: absolute;
-        right: -2px;
-        top: -2px;
-        width: 6px;
-        height: 6px;
+        right: -2px; top: -2px;
+        width: 6px; height: 6px;
         background: #94a3b8;
         transform: rotate(45deg);
     }
 
-    /* UI Elements */
     .hud {
         padding: 20px;
         background: #040d08;
@@ -137,12 +129,6 @@
         font-weight: 800;
         text-transform: uppercase;
         transition: all 0.2s;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-    }
-
-    #start-btn:hover {
-        background: #34d399;
-        transform: scale(1.05);
     }
 </style>
 </head>
@@ -153,10 +139,11 @@
     <h2 style="margin:0; color:#34d399;">🧝 Elf Archer</h2>
     <div class="stat-box">HITS: <span id="hits">0</span></div>
     <button id="start-btn">Begin Hunt</button>
+    <div style="font-size: 12px; color: #666;">Use <b>A / D</b> or <b>Arrows</b> to move</div>
 </div>
 
 <div class="archery-canvas" id="canvas">
-    <div class="elf" id="player-elf">
+    <div class="elf" id="player-elf" style="left: 50%;">
         <div class="elf-emoji">🧝</div>
         <div class="bow-container" id="bow-ui">
             <svg width="60" height="100" viewBox="0 0 60 100">
@@ -181,27 +168,43 @@ let targets = [];
 let isPlaying = false;
 const gravity = 0.25;
 
-let elfX = 100;
+// --- MOVEMENT VARIABLES ---
+let playerX = canvas.clientWidth / 2;
+let moveDir = 0; // -1 for left, 1 for right, 0 for still
+const moveSpeed = 7;
+
 let mouseX = 0;
 let mouseY = 0;
 let isAiming = false;
 let aimStartX = 0;
 let aimStartY = 0;
 
-// Update mouse tracking
+// Input Listeners
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'a' || e.key === 'ArrowLeft') moveDir = -1;
+    if (e.key === 'd' || e.key === 'ArrowRight') moveDir = 1;
+});
+
+window.addEventListener('keyup', (e) => {
+    if ((e.key === 'a' || e.key === 'ArrowLeft') && moveDir === -1) moveDir = 0;
+    if ((e.key === 'd' || e.key === 'ArrowRight') && moveDir === 1) moveDir = 0;
+});
+
 window.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
+    updateBowRotation();
+});
+
+function updateBowRotation() {
+    const bowWorldX = playerX + 35;
+    const bowWorldY = canvas.clientHeight - 45;
 
     if (!isAiming) {
-        // Look at cursor
-        const bowWorldX = elfX + 35;
-        const bowWorldY = canvas.clientHeight - 45;
         const angle = Math.atan2(mouseY - bowWorldY, mouseX - bowWorldX);
         bowContainer.style.transform = `rotate(${angle}rad)`;
     } else {
-        // Drag logic: Pulling backwards
         const dx = aimStartX - mouseX;
         const dy = aimStartY - mouseY;
         const angle = Math.atan2(dy, dx);
@@ -211,7 +214,7 @@ window.addEventListener('mousemove', (e) => {
         bowContainer.style.transform = `rotate(${angle}rad)`;
         bowString.setAttribute('d', `M 10 12 L ${10 - drawAmount} 50 L 10 88`);
     }
-});
+}
 
 canvas.addEventListener('mousedown', (e) => {
     if (!isPlaying) return;
@@ -229,16 +232,10 @@ window.addEventListener('mouseup', (e) => {
     const dy = aimStartY - mouseY;
     const angle = Math.atan2(dy, dx);
     const dist = Math.sqrt(dx*dx + dy*dy);
-    
-    // Power calculation
     const power = Math.min(dist * 0.15, 20);
     
-    // Reset string
     bowString.setAttribute('d', `M 10 12 L 10 50 L 10 88`);
-    
-    if (power > 2) {
-        shootArrow(angle, power);
-    }
+    if (power > 2) shootArrow(angle, power);
 });
 
 function shootArrow(angle, power) {
@@ -248,7 +245,7 @@ function shootArrow(angle, power) {
 
     arrows.push({
         el: arrowEl,
-        x: elfX + 35,
+        x: playerX + 35,
         y: canvas.clientHeight - 45,
         vx: Math.cos(angle) * power,
         vy: Math.sin(angle) * power,
@@ -259,7 +256,7 @@ function shootArrow(angle, power) {
 function spawnTarget() {
     const targetEl = document.createElement('div');
     targetEl.className = 'target';
-    const x = Math.random() * (canvas.clientWidth - 200) + 150;
+    const x = Math.random() * (canvas.clientWidth - 100) + 50;
     const y = Math.random() * (canvas.clientHeight - 250) + 50;
     targetEl.style.left = x + 'px';
     targetEl.style.top = y + 'px';
@@ -275,7 +272,18 @@ function spawnTarget() {
 }
 
 function update() {
-    // Update Arrow Physics
+    // --- MOVE PLAYER ---
+    if (moveDir !== 0) {
+        playerX += moveDir * moveSpeed;
+        // Boundary checks
+        if (playerX < 0) playerX = 0;
+        if (playerX > canvas.clientWidth - 60) playerX = canvas.clientWidth - 60;
+        
+        playerElf.style.left = playerX + 'px';
+        updateBowRotation(); // Keep bow pointing at cursor while walking
+    }
+
+    // --- ARROW PHYSICS ---
     arrows.forEach((arrow, i) => {
         arrow.vy += gravity;
         arrow.x += arrow.vx;
@@ -286,7 +294,6 @@ function update() {
         arrow.el.style.top = arrow.y + 'px';
         arrow.el.style.transform = `translate(-50%, -50%) rotate(${arrow.rotation}rad)`;
 
-        // Collision Check
         targets.forEach((target, ti) => {
             const dx = arrow.x - (target.x + 20);
             const dy = arrow.y - (target.y + 20);
@@ -297,7 +304,6 @@ function update() {
                 target.el.style.opacity = '0';
                 setTimeout(() => target.el.remove(), 100);
                 arrow.el.remove();
-                
                 targets.splice(ti, 1);
                 arrows.splice(i, 1);
                 hits++;
@@ -305,9 +311,8 @@ function update() {
             }
         });
 
-        // Cleanup
         if (arrow.y > canvas.clientHeight + 100 || arrow.x > canvas.clientWidth + 100 || arrow.x < -100) {
-            arrow.el.remove();
+            if (arrow.el.parentNode) arrow.el.remove();
             arrows.splice(i, 1);
         }
     });
@@ -339,7 +344,6 @@ startBtn.addEventListener('click', () => {
     }, 1000);
 });
 
-// Start loop
 update();
 </script>
 </body>
