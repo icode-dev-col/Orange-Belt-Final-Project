@@ -1,148 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emerald Archer - Training Grounds</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerald Archer - Training Grounds</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
 
-<style>
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #040d08;
-        color: #ecfdf5;
-        text-align: center;
-        overflow: hidden;
-    }
+        .magical-bg-container {
+            background-image: url('../images/elf.png');
+            filter: brightness(0.3) contrast(1.1);
+        }
 
-    .archery-canvas {
-        width: 100%;
-        height: 600px;
-        background: radial-gradient(circle at 50% 40%, #1a3a2a 0%, #040d08 70%);
-        border-bottom: 8px solid #0a1a12;
-        position: relative;
-        overflow: hidden;
-        cursor: crosshair;
-        box-shadow: inset 0 -20px 50px rgba(0,0,0,0.5);
-    }
+        .game-canvas-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
 
-    .target {
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        background: rgba(239, 68, 68, 0.2);
-        border: 4px solid #ffffff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-    }
-    .target::after {
-        content: '';
-        width: 15px;
-        height: 15px;
-        background: #ef4444;
-        border-radius: 50%;
-    }
+        .archery-canvas {
+            width: 100%;
+            max-width: 1000px;
+            height: 600px;
+            background: radial-gradient(circle at 50% 40%, rgba(26, 58, 42, 0.4) 0%, rgba(4, 13, 8, 0.8) 70%);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
 
-    /* Character & Bow */
-    .elf {
-        position: absolute;
-        width: 60px;
-        height: 80px;
-        bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        z-index: 20;
-        will-change: left; /* Optimization for movement */
-    }
+        .target {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+        }
+        .target::after {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
 
-    .elf-emoji {
-        font-size: 50px;
-        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-        user-select: none;
-    }
+        /* Character & Bow */
+        .elf {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            will-change: left;
+        }
 
-    .bow-container {
-        position: absolute;
-        width: 60px;
-        height: 100px;
-        top: 35px;
-        left: 25px; 
-        pointer-events: none;
-        transform-origin: 10px 50px; 
-        transition: transform 0.1s ease-out;
-    }
+        .elf-emoji {
+            font-size: 50px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+            user-select: none;
+        }
 
-    .arrow {
-        position: absolute;
-        width: 40px;
-        height: 3px;
-        background: #8d6e63;
-        border-radius: 2px;
-        z-index: 15;
-    }
-    .arrow::before { 
-        content: '';
-        position: absolute;
-        left: 0; top: -3px;
-        width: 8px; height: 9px;
-        background: #34d399;
-        clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
-    }
-    .arrow::after { 
-        content: '';
-        position: absolute;
-        right: -2px; top: -2px;
-        width: 6px; height: 6px;
-        background: #94a3b8;
-        transform: rotate(45deg);
-    }
+        .bow-container {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            top: 35px;
+            left: 25px; 
+            pointer-events: none;
+            transform-origin: 10px 50px; 
+            transition: transform 0.1s ease-out;
+        }
 
-    .hud {
-        padding: 20px;
-        background: #040d08;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 30px;
-    }
+        .arrow {
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background: #8d6e63;
+            border-radius: 2px;
+            z-index: 15;
+        }
+        .arrow::before { 
+            content: '';
+            position: absolute;
+            left: 0; top: -3px;
+            width: 8px; height: 9px;
+            background: #34d399;
+            clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
+        }
+        .arrow::after { 
+            content: '';
+            position: absolute;
+            right: -2px; top: -2px;
+            width: 6px; height: 6px;
+            background: #94a3b8;
+            transform: rotate(45deg);
+        }
 
-    .stat-box {
-        background: rgba(16, 185, 129, 0.1);
-        padding: 10px 20px;
-        border-radius: 20px;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        font-weight: bold;
-    }
+        .hud {
+            padding: 1.5rem;
+            background: var(--nav-bg);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    #start-btn {
-        padding: 12px 40px;
-        font-size: 18px;
-        background: #10b981;
-        color: #040d08;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        font-weight: 800;
-        text-transform: uppercase;
-        transition: all 0.2s;
-    }
-</style>
+        .stat-box {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--gold);
+            font-weight: bold;
+            color: var(--gold);
+            font-family: var(--font-heading);
+            letter-spacing: 1px;
+        }
+
+        #start-btn {
+            padding: 10px 30px;
+            font-size: 1rem;
+            background: linear-gradient(45deg, var(--wood-brown), var(--forest-light));
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            font-family: var(--font-heading);
+        }
+
+        #start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--gold-glow);
+            color: #fff;
+        }
+    </style>
 </head>
 
-<body>
+<body class="page-transition">
 
-<div class="hud">
-    <h2 style="margin:0; color:#34d399;">🧝 Elf Archer</h2>
-    <div class="stat-box">HITS: <span id="hits">0</span></div>
-    <button id="start-btn">Begin Hunt</button>
-    <div style="font-size: 12px; color: #666;">Use <b>A / D</b> or <b>Arrows</b> to move</div>
-</div>
+    <div class="magical-bg-container"></div>
+    <div class="overlay"></div>
+    <div class="mist"></div>
 
-<div class="archery-canvas" id="canvas">
+    <nav>
+        <a href="../index.html">← Return to Forest</a>
+        <a href="index.html">Gallery</a>
+        <a href="info.html">Lore</a>
+        <a href="game.html" class="active">Mini-Game</a>
+    </nav>
+
+    <div class="game-canvas-wrapper">
+        <div class="hud">
+            <h2 class="cinzel" style="margin:0; font-size: 1.5rem;">Emerald Archer</h2>
+            <div class="stat-box">HITS: <span id="hits">0</span></div>
+            <button id="start-btn">Begin Hunt</button>
+            <div style="font-size: 12px; color: var(--gold); opacity: 0.8; font-family: var(--font-body);">Use <b>A / D</b> or <b>Arrows</b> to move</div>
+        </div>
+
+        <div class="archery-canvas" id="canvas">
     <div class="elf" id="player-elf" style="left: 50%;">
         <div class="elf-emoji">🧝</div>
         <div class="bow-container" id="bow-ui">
@@ -151,6 +193,7 @@
                 <path id="bow-string" d="M 10 12 L 10 50 L 10 88" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
             </svg>
         </div>
+    </div>
     </div>
 </div>
 
