@@ -174,16 +174,19 @@
                     <span class="key">←</span> <span class="key">→</span> <span>Move Pixie left and right</span>
                 </div>
                 <div class="instruction-row">
+                    <span class="key">SPACE</span> <span>Magic Flutter (Extra Boost)</span>
+                </div>
+                <div class="instruction-row">
                     <span>☁️</span> <span>Jump on fluffy clouds to climb higher</span>
+                </div>
+                <div class="instruction-row">
+                    <span>⭐</span> <span>Star: Temporary <b>Magic Glow</b> & Speed</span>
                 </div>
                 <div class="instruction-row">
                     <span>🪙</span> <span>Collect Gold Coins for <b>+500</b> Magic</span>
                 </div>
                 <div class="instruction-row">
                     <span>🪽</span> <span>Grab Wings for a <b>Super Jump</b></span>
-                </div>
-                <div class="instruction-row">
-                    <span>⚠️</span> <span>Watch out for dark clouds that vanish!</span>
                 </div>
             </div>
 
@@ -207,6 +210,8 @@ let x, y, vy, vx, score, gameRunning;
 let gravity = 0.45;
 let platforms = [];
 let collectibles = [];
+let powerActive = false;
+let moveSpeed = 9;
 const PLATFORM_COUNT = 250;
 
 function init() {
@@ -214,6 +219,8 @@ function init() {
     y = window.innerHeight - 200;
     vy = 0; vx = 0; score = 0;
     gameRunning = false;
+    powerActive = false;
+    moveSpeed = 9;
     
     platforms.forEach(p => p.el.remove());
     collectibles.forEach(c => c.el.remove());
@@ -221,6 +228,7 @@ function init() {
     collectibles = [];
     scoreVal.innerText = "0";
     playerEl.style.transform = "scale(1)";
+    playerEl.style.filter = "none";
 }
 
 function addPlatform(px, py, width, type = 'normal') {
@@ -238,10 +246,13 @@ function addPlatform(px, py, width, type = 'normal') {
         dir: Math.random() > 0.5 ? 1 : -1
     });
 
-    // Spawn collectibles (Coins, Wings)
+    // Spawn collectibles (Coins, Wings, Stars)
     let rand = Math.random();
     if (rand > 0.8) { 
-        let itemType = rand > 0.96 ? 'wing' : 'coin';
+        let itemType = 'coin';
+        if (rand > 0.97) itemType = 'wing';
+        else if (rand > 0.94) itemType = 'star';
+        
         addItem(px + (width/2) - 15, py - 60, itemType);
     }
 }
@@ -249,7 +260,11 @@ function addPlatform(px, py, width, type = 'normal') {
 function addItem(px, py, type) {
     let el = document.createElement("div");
     el.className = `collectible ${type}`;
-    el.innerText = type === 'wing' ? '🪽' : '🪙';
+    let icon = '🪙';
+    if (type === 'wing') icon = '🪽';
+    else if (type === 'star') icon = '⭐';
+    
+    el.innerText = icon;
     el.style.left = px + "px";
     el.style.top = py + "px";
     gameContainer.appendChild(el);
@@ -315,6 +330,7 @@ function update() {
         if (x + 45 > c.x && x < c.x + 30 && y + 45 > c.y && y < c.y + 30) {
             if (c.type === 'wing') vy = -35;
             else if (c.type === 'coin') score += 500;
+            else if (c.type === 'star') applyStarPower();
             
             c.el.remove();
             collectibles.splice(index, 1);
@@ -358,10 +374,26 @@ function update() {
     requestAnimationFrame(update);
 }
 
+function applyStarPower() {
+    powerActive = true;
+    moveSpeed = 15;
+    playerEl.style.filter = "drop-shadow(0 0 20px gold) sepia(1)";
+    vy = -20;
+    setTimeout(() => {
+        powerActive = false;
+        moveSpeed = 9;
+        playerEl.style.filter = "none";
+    }, 5000);
+}
+
 // Input Handlers
 window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") vx = -9;
-    if (e.key === "ArrowRight") vx = 9;
+    if (e.key === "ArrowLeft") vx = -moveSpeed;
+    if (e.key === "ArrowRight") vx = moveSpeed;
+    if (e.key === " " && gameRunning) {
+        vy = -10; // Magic flutter boost
+        // Small puff effect could go here
+    }
 });
 window.addEventListener("keyup", (e) => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") vx = 0;
