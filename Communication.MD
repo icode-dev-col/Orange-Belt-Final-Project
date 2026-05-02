@@ -21,3 +21,6 @@ As for the notes, I am planning to add that in a Google Doc for easier maintenan
 
 NR [5/02/2026, 1216]: EZ - AA and I noticed a bug in the pixie game. Pressing the space bar allows us to fly up on an infinite basis. Perhaps we add a constraint that it's game over when the pixie (/player) collides with a cloud? That way, we force the player to use the other controls as well.
  
+NR [5/02/2026, 1236]: AA, EZ and MB - we could start working on our presentations and update it as we go! Let it not be too much of a task to complete in the last minute...
+
+Also, since this project is fully front-end, I plan to have a mini-project going over the back-end concepts (PHP and SQL) that we learned! Let's work on this project next week (9th May 2026) and the week after that, if it happens to spill over. This project will be run locally using XAMPP, but we will maintain a GitHub repository. 
