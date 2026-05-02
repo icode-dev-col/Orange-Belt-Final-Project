@@ -78,35 +78,79 @@ body {
 }
 
 .fire-wall {
-    background: #ff4500;
+    background: #1a0500;
     position: relative;
     z-index: 5;
-    animation: fire-glow 1s infinite alternate;
+    /* No overflow hidden here to let flames rise */
 }
 
+/* The rising flames */
+.fire-wall::before {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    width: 140%;
+    height: 250%;
+    background: radial-gradient(ellipse at bottom, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(255, 255, 0, 0.9) 20%, 
+        rgba(255, 100, 0, 0.8) 40%, 
+        rgba(255, 50, 0, 0.6) 60%, 
+        transparent 80%);
+    transform: translateX(-50%);
+    filter: blur(4px);
+    border-radius: 50% 50% 20% 20%;
+    animation: flame-rise 0.8s infinite ease-in;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Second layer of flames for depth */
 .fire-wall::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle, rgba(255,200,0,0.6) 0%, transparent 70%);
-    animation: flicker 0.1s infinite;
+    bottom: 10%;
+    left: 50%;
+    width: 100%;
+    height: 180%;
+    background: radial-gradient(ellipse at bottom, 
+        rgba(255, 200, 0, 0.9) 0%, 
+        rgba(255, 50, 0, 0.7) 50%, 
+        transparent 80%);
+    transform: translateX(-50%);
+    filter: blur(6px);
+    border-radius: 50% 50% 20% 20%;
+    animation: flame-rise 1.2s infinite ease-in;
+    animation-delay: 0.2s;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0;
 }
 
-@keyframes fire-glow {
+@keyframes flame-rise {
     0% { 
-        background-color: #e25822;
-        box-shadow: 0 0 10px #e25822, 0 0 20px #b22222;
+        transform: translateX(-50%) translateY(0) scale(0.8, 0.5);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    50% { 
+        transform: translateX(-45%) translateY(-15px) scale(1.1, 1.2);
+        opacity: 0.8;
     }
     100% { 
-        background-color: #ff4500;
-        box-shadow: 0 0 20px #ff4500, 0 0 40px #ff8c00;
+        transform: translateX(-55%) translateY(-40px) scale(0.5, 1.5);
+        opacity: 0;
     }
 }
 
-@keyframes flicker {
-    0% { opacity: 0.8; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0.9; transform: scale(1); }
+/* The block itself glowing */
+.wall.fire-wall {
+    box-shadow: 0 0 15px #ff4500, inset 0 0 10px #ff8c00;
+    border-color: #ff4500;
 }
 
 .path {
@@ -119,6 +163,8 @@ body {
 
 #player {
     font-size: calc(3vmin);
+    z-index: 10;
+    position: relative;
 }
 
 #winScreen {
