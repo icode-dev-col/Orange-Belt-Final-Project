@@ -18,4 +18,6 @@ NR [4/21/2026, 2231]: Awesome job on building the games, EZ! Good upgrades with 
 (3) something we could upgrade provided we have time - changing the slab platforms to clouds, with a sky background + adding sound effects + adding levels to the game (maybe add obstacles/NPCs you have to avoid, things like that)
 
 As for the notes, I am planning to add that in a Google Doc for easier maintenance - will share that soon!
+
+NR [5/02/2026, 1216]: EZ - AA and I noticed a bug in the pixie game. Pressing the space bar allows us to fly up on an infinite basis. Perhaps we add a constraint that it's game over when the pixie (/player) collides with a cloud? That way, we force the player to use the other controls as well.
  
