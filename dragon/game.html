@@ -2,305 +2,241 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Dragon's Maze</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Dragon's Maze - Hoard Edition</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #050505;
+            color: #e0e0e0;
+            font-family: 'Palatino', serif;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Background Elements --- */
+        .magical-bg-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('../images/dragon.png');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.15);
+            z-index: -2;
+        }
+        .mist {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, black 100%);
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 30;
+        }
+        nav a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        nav a:hover, nav a.active {
+            color: gold;
+        }
+
+        /* --- Top Bar --- */
+        #topBar {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: linear-gradient(to bottom, rgba(34,34,34,0.8), rgba(0,0,0,0.9));
+            border-bottom: 2px solid #444;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            z-index: 20;
+            flex-shrink: 0;
+        }
+
+        #level {
+            color: gold;
+            margin-left: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        #gameContainer {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        #maze {
+            display: grid;
+            gap: 2px; 
+            border: 4px solid #333;
+            background: rgba(17, 17, 17, 0.8);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .path {
+            background: rgba(28, 28, 28, 0.6);
+            border: 1px solid rgba(40, 40, 40, 0.5);
+        }
+
+        /* --- Wall Styling --- */
+        .wall {
+            background-color: #222;
+            background-image: 
+                linear-gradient(335deg, #111 23%, transparent 23%),
+                linear-gradient(155deg, #1a1a1a 23%, transparent 23%);
+            box-shadow: inset 0 0 8px #000;
+        }
+
+        #player {
+            filter: drop-shadow(0 0 15px rgba(255, 100, 0, 1));
+            animation: breathe 2s infinite ease-in-out;
+            z-index: 20;
+        }
+
+        .goal {
+            filter: drop-shadow(0 0 10px gold);
+            animation: pulse 0.8s infinite alternate;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.9); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.8); }
+            to { transform: scale(1.1); }
+        }
+
+        #winScreen {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: gold;
+            z-index: 100;
+        }
+    </style>
 </head>
-<body class="page-transition">
+<body>
 
-    <div class="magical-bg-container" style="background-image: url('../images/dragon.png'); filter: brightness(0.2);"></div>
-    <div class="overlay"></div>
-    <div class="mist"></div>
+<div class="magical-bg-container"></div>
+<div class="mist"></div>
 
-    <nav>
-        <a href="../index.html">← Return to Forest</a>
-        <a href="index.html">Gallery</a>
-        <a href="info.html">Lore</a>
-        <a href="game.html" class="active">Mini-Game</a>
-    </nav>
+<nav>
+    <a href="../index.html">← Return to Forest</a>
+    <a href="index.html">Gallery</a>
+    <a href="info.html">Lore</a>
+    <a href="game.html" class="active">Mini-Game</a>
+</nav>
 
-<div id="game">
-    <div id="topBar">
-        🐉 Level: <span id="level">1</span>
-    </div>
+<div id="topBar">🏰 Chamber <span id="level">1</span></div>
 
+<div id="gameContainer">
     <div id="maze"></div>
-
-    <div id="winScreen">
-        <h1>🎉 Game Complete!</h1>
-    </div>
 </div>
 
-<style>
-body {
-    margin: 0;
-    background: black;
-    color: white;
-    font-family: sans-serif;
-    overflow: hidden;
-}
-
-#game {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 10;
-}
-
-#topBar {
-    padding: 10px;
-    font-size: 20px;
-    text-align: center;
-    background: rgba(17, 17, 17, 0.8);
-    backdrop-filter: blur(5px);
-}
-
-#maze {
-    flex: 1;
-    display: grid;
-    justify-content: center;
-    align-content: center;
-}
-
-.cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: calc(2vmin);
-}
-
-.wall {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-}
-
-.fire-wall {
-    background: #1a0500;
-    position: relative;
-    z-index: 5;
-    /* No overflow hidden here to let flames rise */
-}
-
-/* The rising flames */
-.fire-wall::before {
-    content: '';
-    position: absolute;
-    bottom: 20%;
-    left: 50%;
-    width: 140%;
-    height: 250%;
-    background: radial-gradient(ellipse at bottom, 
-        rgba(255, 255, 255, 1) 0%, 
-        rgba(255, 255, 0, 0.9) 20%, 
-        rgba(255, 100, 0, 0.8) 40%, 
-        rgba(255, 50, 0, 0.6) 60%, 
-        transparent 80%);
-    transform: translateX(-50%);
-    filter: blur(4px);
-    border-radius: 50% 50% 20% 20%;
-    animation: flame-rise 0.8s infinite ease-in;
-    mix-blend-mode: screen;
-    pointer-events: none;
-    opacity: 0;
-}
-
-/* Second layer of flames for depth */
-.fire-wall::after {
-    content: '';
-    position: absolute;
-    bottom: 10%;
-    left: 50%;
-    width: 100%;
-    height: 180%;
-    background: radial-gradient(ellipse at bottom, 
-        rgba(255, 200, 0, 0.9) 0%, 
-        rgba(255, 50, 0, 0.7) 50%, 
-        transparent 80%);
-    transform: translateX(-50%);
-    filter: blur(6px);
-    border-radius: 50% 50% 20% 20%;
-    animation: flame-rise 1.2s infinite ease-in;
-    animation-delay: 0.2s;
-    mix-blend-mode: screen;
-    pointer-events: none;
-    opacity: 0;
-}
-
-@keyframes flame-rise {
-    0% { 
-        transform: translateX(-50%) translateY(0) scale(0.8, 0.5);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    50% { 
-        transform: translateX(-45%) translateY(-15px) scale(1.1, 1.2);
-        opacity: 0.8;
-    }
-    100% { 
-        transform: translateX(-55%) translateY(-40px) scale(0.5, 1.5);
-        opacity: 0;
-    }
-}
-
-/* The block itself glowing */
-.wall.fire-wall {
-    box-shadow: 0 0 15px #ff4500, inset 0 0 10px #ff8c00;
-    border-color: #ff4500;
-}
-
-.path {
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.goal {
-    background: gold;
-}
-
-#player {
-    font-size: calc(3vmin);
-    z-index: 10;
-    position: relative;
-}
-
-#winScreen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    font-size: 40px;
-}
-</style>
+<div id="winScreen">
+    <h1>👑 HOARD SECURED</h1>
+    <p>You have conquered all chambers.</p>
+    <button onclick="location.reload()" style="padding: 12px 24px; cursor: pointer; background: gold; border: none; font-weight: bold; border-radius: 5px; margin-top: 20px;">Replay Quest</button>
+</div>
 
 <script>
 const mazeEl = document.getElementById("maze");
 const levelEl = document.getElementById("level");
 const winScreen = document.getElementById("winScreen");
 
-let level = 0;
-let playerPos = {x:0,y:0};
+let currentLevelIdx = 0;
+let playerPos = {x:0, y:0};
 
 const levels = [
-
-/* LEVEL 1 (tutorial) */
-[
-"########",
-"#S....G#",
-"########"
-],
-
-/* LEVEL 2 (fake paths start) */
-[
-"##########",
-"#S..#....#",
-"#.#.#.##.#",
-"#.#...#..#",
-"#.#####..#",
-"#......G.#",
-"##########"
-],
-
-/* LEVEL 3 (multiple wrong decisions) */
-[
-"############",
-"#S..#......#",
-"#.#.#.####.#",
-"#.#.#....#.#",
-"#...####.#.#",
-"###......#.#",
-"#.########.#",
-"#........G.#",
-"############"
-],
-
-/* LEVEL 4 (long path + traps) */
-[
-"##############",
-"#S#..........#",
-"#.#.########.#",
-"#.#.#......#.#",
-"#...#.####.#.#",
-"###.#.#....#.#",
-"#...#.#.####.#",
-"#.###.#......#",
-"#.....######.#",
-"#.##########G#",
-"##############"
-],
-
-/* LEVEL 5 (INSANE – like Poki style) */
-[
-"################",
-"#S#............#",
-"#.#.##########.#",
-"#.#.#........#.#",
-"#.#.#.######.#.#",
-"#...#.#....#.#.#",
-"#####.#.##.#.#.#",
-"#.....#.#..#.#.#",
-"#.#####.#.##.#.#",
-"#.#.....#....#.#",
-"#.#.##########.#",
-"#.#............#",
-"#.############.#",
-"#............#G#",
-"################"
-]
-
-
-
-
+    ["########","#S....G#","########"],
+    ["##########","#S..#....#","#.#.#.##.#","#.#...#..#","#.#####..#","#......G.#","##########"],
+    ["############","#S..#......#","#.#.#.####.#","#.#.#....#.#","#...####.#.#","###......#.#","#.########.#","#........G.#","############"],
+    ["##############","#S#..........#","#.#.########.#","#.#.#......#.#","#...#.####.#.#","###.#.#....#.#","#...#.#.####.#","#.###.#......#","#.....######.#","#.##########G#","##############"],
+    ["################","#S#............#","#.#.##########.#","#.#.#........#.#","#.#.#.######.#.#","#...#.#....#.#.#","#####.#.##.#.#.#","#.....#.#..#.#.#","#.#####.#.##.#.#","#.#.....#....#.#","#.#.##########.#","#.#............#","#.############.#","#............#G#","################"]
 ];
 
 function loadLevel() {
     mazeEl.innerHTML = "";
-    const map = levels[level];
-
+    levelEl.innerText = currentLevelIdx + 1;
+    
+    const map = levels[currentLevelIdx];
     const rows = map.length;
     const cols = map[0].length;
 
-    mazeEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    mazeEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const availableWidth = window.innerWidth * 0.85;
+    const availableHeight = (window.innerHeight - 150) * 0.85;
+    const cellSize = Math.floor(Math.min(availableWidth / cols, availableHeight / rows));
+
+    mazeEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+    mazeEl.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
 
     map.forEach((row, y) => {
         [...row].forEach((cell, x) => {
             const div = document.createElement("div");
             div.classList.add("cell");
+            div.style.width = `${cellSize}px`;
+            div.style.height = `${cellSize}px`;
 
             if (cell === "#") {
                 div.classList.add("wall");
-                // Add fire to the border walls
-                if (x === 0 || y === 0 || x === cols - 1 || y === rows - 1) {
-                    div.classList.add("fire-wall");
-                    div.style.animationDelay = `${Math.random() * 2}s`;
-                }
+            } else {
+                div.classList.add("path");
             }
-            else div.classList.add("path");
 
             if (cell === "S") {
                 playerPos = {x, y};
                 div.id = "player";
                 div.innerHTML = "🐉";
+                div.style.fontSize = `${cellSize * 0.7}px`;
             }
 
-            if (cell === "G") div.classList.add("goal");
+            if (cell === "G") {
+                div.classList.add("goal");
+                div.innerHTML = "🪙";
+                div.style.fontSize = `${cellSize * 0.6}px`;
+            }
 
             mazeEl.appendChild(div);
         });
     });
-
-    levelEl.innerText = level + 1;
 }
 
 function move(dx, dy) {
-    const map = levels[level];
+    const map = levels[currentLevelIdx];
     const newX = playerPos.x + dx;
     const newY = playerPos.y + dy;
 
@@ -309,29 +245,37 @@ function move(dx, dy) {
 
     const cells = document.querySelectorAll(".cell");
     const cols = map[0].length;
-
     const oldIndex = playerPos.y * cols + playerPos.x;
     const newIndex = newY * cols + newX;
 
+    const playerEmoji = cells[oldIndex].innerHTML;
+    const playerSize = cells[oldIndex].style.fontSize;
+
     cells[oldIndex].innerHTML = "";
-    cells[oldIndex].removeAttribute("id");
+    cells[oldIndex].id = "";
 
-    playerPos = {x:newX,y:newY};
-
-    cells[newIndex].id = "player";
-    cells[newIndex].innerHTML = "🐉";
-
+    playerPos = {x:newX, y:newY};
+    
     if (map[newY][newX] === "G") {
-        level++;
-        if (level >= levels.length) {
+        currentLevelIdx++;
+        if (currentLevelIdx >= levels.length) {
             winScreen.style.display = "flex";
-            return;
+        } else {
+            setTimeout(loadLevel, 100);
         }
-        loadLevel();
+    } else {
+        cells[newIndex].id = "player";
+        cells[newIndex].innerHTML = playerEmoji;
+        cells[newIndex].style.fontSize = playerSize;
     }
 }
 
+window.addEventListener("resize", loadLevel);
+
 document.addEventListener("keydown", e => {
+    if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+    }
     if (e.key === "ArrowUp") move(0,-1);
     if (e.key === "ArrowDown") move(0,1);
     if (e.key === "ArrowLeft") move(-1,0);
