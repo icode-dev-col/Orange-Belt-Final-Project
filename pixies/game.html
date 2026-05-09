@@ -184,7 +184,7 @@
                     <span class="key">←</span> <span class="key">→</span> <span>Move Pixie left and right</span>
                 </div>
                 <div class="instruction-row">
-                    <span class="key">SPACE</span> <span>Magic Flutter (Extra Boost)</span>
+                    <span class="key">SPACE</span> <span>Magic Flutter — use wisely, has a cooldown!</span>
                 </div>
                 <div class="instruction-row">
                     <span>☁️</span> <span>Jump on fluffy clouds to climb higher</span>
@@ -222,6 +222,7 @@ let platforms = [];
 let collectibles = [];
 let powerActive = false;
 let moveSpeed = 9;
+let flutterCooldown = false;   // prevents infinite spacebar flight
 const PLATFORM_COUNT = 250;
 
 function init() {
@@ -231,6 +232,7 @@ function init() {
     gameRunning = false;
     powerActive = false;
     moveSpeed = 9;
+    flutterCooldown = false;
     
     platforms.forEach(p => p.el.remove());
     collectibles.forEach(c => c.el.remove());
@@ -285,20 +287,33 @@ function createInitialPlatforms() {
     // Ground platform
     addPlatform(x - 50, y + 100, 150, 'normal');
 
-    // Generate stack - reduced distance from 120 to 95
+    // Generate stack with controlled X spread so platforms are always reachable
+    let lastX = x - 50;
     for (let i = 1; i < PLATFORM_COUNT; i++) {
-        spawnPlatformAtY(window.innerHeight - (i * 95)); 
+        spawnPlatformAtY(window.innerHeight - (i * 95), lastX);
+        lastX = platforms[platforms.length - 1].x;
     }
 }
 
-function spawnPlatformAtY(atY) {
+function spawnPlatformAtY(atY, lastX = null) {
     let type = 'normal';
     let rand = Math.random();
     if (rand > 0.85) type = 'moving';
     else if (rand > 0.7) type = 'breaking';
-    
+
+    // Constrain X so the next platform is always within jumping distance (~250px)
+    let px;
+    if (lastX === null) {
+        px = Math.random() * (window.innerWidth - 120);
+    } else {
+        const maxStep = 220;
+        const minX = Math.max(0, lastX - maxStep);
+        const maxX = Math.min(window.innerWidth - 160, lastX + maxStep);
+        px = minX + Math.random() * (maxX - minX);
+    }
+
     addPlatform(
-        Math.random() * (window.innerWidth - 120),
+        px,
         atY,
         100 + Math.random() * 60, // Slightly wider platforms (was 80)
         type
@@ -357,10 +372,14 @@ function update() {
             p.y += diff;
             p.el.style.top = p.y + "px";
             
-            // Loop platforms back to top
+            // Loop platforms back to top with constrained X
             if (p.y > window.innerHeight) {
                 p.y -= (PLATFORM_COUNT * 95); // Match generation distance
-                p.x = Math.random() * (window.innerWidth - 120);
+                // Stay within 220px of current player X so recycled platforms are reachable
+                const maxStep = 220;
+                const minX = Math.max(0, x - maxStep);
+                const maxX = Math.min(window.innerWidth - 160, x + maxStep);
+                p.x = minX + Math.random() * (maxX - minX);
                 p.el.style.left = p.x + "px";
                 p.el.style.opacity = "1"; 
             }
@@ -400,9 +419,10 @@ function applyStarPower() {
 window.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") vx = -moveSpeed;
     if (e.key === "ArrowRight") vx = moveSpeed;
-    if (e.key === " " && gameRunning) {
+    if (e.key === " " && gameRunning && !flutterCooldown) {
         vy = -10; // Magic flutter boost
-        // Small puff effect could go here
+        flutterCooldown = true;
+        setTimeout(() => { flutterCooldown = false; }, 1500); // 1.5s cooldown
     }
 });
 window.addEventListener("keyup", (e) => {
