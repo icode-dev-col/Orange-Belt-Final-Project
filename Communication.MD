@@ -28,3 +28,5 @@ Also, since this project is fully front-end, I plan to have a mini-project going
 EZ[5/7/2026, 2018]: I made the dragon game but it does not link with the website
 
 NR [5/08/2026, 2039]: Great job, EZ. It is a simple fix - just add the HTML code for the headers etc in your game script! Look through the other pages to get an idea!
+
+Another update - we will be working on a backend project tomorrow. 
