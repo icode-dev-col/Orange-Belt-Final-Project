@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Dragon's Maze - Hoard Edition</title>
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         body, html {
             margin: 0;
@@ -119,6 +120,7 @@
             filter: drop-shadow(0 0 15px rgba(255, 100, 0, 1));
             animation: breathe 2s infinite ease-in-out;
             z-index: 20;
+            transform: scaleX(-1);
         }
 
         .goal {
@@ -127,8 +129,8 @@
         }
 
         @keyframes breathe {
-            0%, 100% { transform: scale(0.9); }
-            50% { transform: scale(1.1); }
+            0%, 100% { transform: scaleX(-1) scale(0.9); }
+            50% { transform: scaleX(-1) scale(1.1); }
         }
 
         @keyframes pulse {
@@ -161,7 +163,9 @@
     <a href="game.html" class="active">Mini-Game</a>
 </nav>
 
-<div id="topBar">🏰 Chamber <span id="level">1</span></div>
+<header class="hero">
+    <h1 class="cinzel">The Dragon's Maze <span id="level">1</span></h1>
+</header>
 
 <div id="gameContainer">
     <div id="maze"></div>
