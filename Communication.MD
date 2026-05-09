@@ -31,4 +31,4 @@ NR [5/08/2026, 2039]: Great job, EZ. It is a simple fix - just add the HTML code
 
 Another update - we will be working on a backend project tomorrow. 
 
-EZ[5/8/2026, 2045]: can you fix how the drangon game the return setion
+EZ[5/8/2026, 2045]: can you fix how the drangon game the return setion look
