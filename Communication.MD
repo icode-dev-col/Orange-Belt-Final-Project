@@ -32,3 +32,9 @@ NR [5/08/2026, 2039]: Great job, EZ. It is a simple fix - just add the HTML code
 Another update - we will be working on a backend project tomorrow. 
 
 EZ[5/8/2026, 2045]: can you fix how the drangon game the return setion look
+
+NR [5/23/2026, 1249]: I have added a file named "MagicalForest_Worksheet", where you can find details pertaining to designing your slide deck, general presentation tips and sample speaker notes. 
+
+It would be ideal if we could finish our slide deck + speaker notes by 6/6. I could then help with clarifying any doubts / reviewing / polishing, that kind of thing. 
+
+Great going guys! Good luck!
