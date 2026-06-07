@@ -38,3 +38,5 @@ NR [5/23/2026, 1249]: I have added a file named "MagicalForest_Worksheet", where
 It would be ideal if we could finish our slide deck + speaker notes by 6/6. I could then help with clarifying any doubts / reviewing / polishing, that kind of thing. 
 
 Great going guys! Good luck!
+
+NR [6/7/2026, 1754]: Hello everyone! Great job on the mock presentation yesterday! I have uploaded the slides on GitHub - let me know if there's any issues you face. 
